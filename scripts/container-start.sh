@@ -13,4 +13,6 @@ trap 'kill "$OLLAMA_PID" 2>/dev/null || true' EXIT
   ollama pull "${OLLAMA_VISION_MODEL:-gemma3:4b}" || true
   ollama pull nomic-embed-text || true
 ) > /tmp/model-setup.log 2>&1 &
-uvicorn backend.main:app --host 0.0.0.0 --port "${PORT:-8000}"
+# Render may set WEB_CONCURRENCY; use one process for shared local inference
+# and a consistent per-session cloud-call counter.
+uvicorn backend.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers 1
