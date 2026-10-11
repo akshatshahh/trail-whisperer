@@ -1,0 +1,2 @@
+# Official kahst/birdnet-team Analyzer; downloads are performed only at setup.
+birdnet-analyzer==2.4.0

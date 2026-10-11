@@ -115,7 +115,7 @@ def rebuild_trips():
 
 @app.get('/api/health')
 def health():
-    return {'mode': MODE, 'model': inference.MODEL, 'cloud_calls_this_session': cloud_calls, 'session_id': session_id, 'storage': 'atlas' if store.mongo is not None else 'sqlite', 'timezone': str(TZ), 'today': datetime.now(TZ).date().isoformat()}
+    return {'mode': MODE, 'model': inference.MODEL, 'vision_model': inference.VISION_MODEL, 'cloud_calls_this_session': cloud_calls, 'session_id': session_id, 'storage': 'atlas' if store.mongo is not None else 'sqlite', 'timezone': str(TZ), 'today': datetime.now(TZ).date().isoformat()}
 
 @app.get('/api/sightings')
 def sightings():

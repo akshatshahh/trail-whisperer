@@ -1,17 +1,18 @@
-import base64, csv, json, os, shutil, subprocess, tempfile, threading
+import base64, csv, json, os, shutil, subprocess, tempfile, threading, sys, importlib.util
 from pathlib import Path
 from urllib.parse import urlparse
 import httpx
 from fastapi import HTTPException
 
 MODEL = os.getenv('OLLAMA_MODEL', 'gemma3n')
+VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'gemma3:4b')
 URL = os.getenv('OLLAMA_URL', 'http://127.0.0.1:11434').rstrip('/')
 if urlparse(URL).hostname not in {'localhost', '127.0.0.1', '::1'}:
     raise RuntimeError('OLLAMA_URL must be loopback: AI inference always runs on this machine.')
 lock = threading.Lock()
 
 def generate(prompt, image=None, structured=False):
-    payload = {'model': MODEL, 'prompt': prompt, 'stream': False, 'options': {'temperature': 0.2}}
+    payload = {'model': VISION_MODEL if image else MODEL, 'prompt': prompt, 'stream': False, 'options': {'temperature': 0.2}}
     if image:
         payload['images'] = [base64.b64encode(image).decode()]
     if structured:
@@ -49,11 +50,11 @@ def identify_audio(path):
             subprocess.run([ffmpeg(), '-y', '-i', str(path), '-t', '5', '-ar', '48000', '-ac', '1', str(wav)], check=True, capture_output=True, timeout=30)
         except (subprocess.SubprocessError, RuntimeError) as e:
             raise HTTPException(422, 'Audio conversion failed. Upload a valid 3–5 second clip.') from e
-        executable = shutil.which('birdnet-analyze')
+        official = importlib.util.find_spec('birdnet_analyzer') is not None
         detections = []
-        if executable:
+        if official:
             try:
-                subprocess.run([executable, '--i', str(wav), '--o', tmp, '--min_conf', '0.5', '--rtype', 'csv'], check=True, capture_output=True, timeout=120, env={**os.environ, 'BIRDNET_MODEL_CACHE': str(Path(os.getenv('BIRDNET_DIR', 'birdnet_models')).resolve())})
+                subprocess.run([sys.executable, '-m', 'backend.birdnet_worker', str(wav), tmp, str(Path(os.getenv('BIRDNET_DIR', 'birdnet_models')).resolve())], check=True, capture_output=True, timeout=120)
                 for file in Path(tmp).rglob('*.csv'):
                     with file.open() as stream:
                         for row in csv.DictReader(stream):
