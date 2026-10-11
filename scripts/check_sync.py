@@ -36,6 +36,7 @@ try:
             rows=c.get(b+'/api/sightings').json()
             if all(s.get('enrichment_status')=='complete' for s in rows):break
             time.sleep(2)
+        assert all(s.get('enrichment_status')=='complete' for s in rows), 'Enrichment remained pending'
         proof['enrichment']=[{'species':s['species'],'status':s.get('enrichment_status'),'embedding_dimensions':len(s.get('embedding') or [])} for s in rows]
         proof['profile']=c.get(b+'/api/species/'+candidate['common']).json()
         r=c.get(b+'/api/similar',params={'query_text':'a small songbird with a black head'});r.raise_for_status();proof['search']=r.json()
