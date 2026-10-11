@@ -8,7 +8,9 @@ from backend.store import Store
 def app(tmp_path, monkeypatch):
     monkeypatch.setenv('DATA_DIR',str(tmp_path))
     monkeypatch.setenv('MODE','trail')
-    monkeypatch.delenv('MONGODB_URI',raising=False)
+    # Empty values prevent load_dotenv from importing the user's real settings.
+    for key in ('MONGODB_URI', 'BASECAMP_URL', 'SYNC_TOKEN', 'ELEVENLABS_API_KEY'):
+        monkeypatch.setenv(key, '')
     from backend import main
     importlib.reload(main)
     return main
