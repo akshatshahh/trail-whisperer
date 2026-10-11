@@ -11,7 +11,8 @@ class Store:
         self.cloud_calls = 0
         if mode == 'basecamp' and os.getenv('MONGODB_URI'):
             from pymongo import MongoClient
-            self.mongo = MongoClient(os.environ['MONGODB_URI'], serverSelectionTimeoutMS=5000).get_database('trail_whisperer')
+            import certifi
+            self.mongo = MongoClient(os.environ['MONGODB_URI'], tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000).get_database('trail_whisperer')
             for name in ('sightings', 'species', 'trips'):
                 self.cloud_calls += 1
                 self.mongo[name].create_index('id', unique=True)
