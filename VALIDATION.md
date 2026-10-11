@@ -13,13 +13,14 @@ Implemented and committed both acts: local trail capture/identification and the 
 - Two isolated live local services: identify → save → sync media + records → real Wikipedia API summary → local Gemma field notes → local embeddings → semantic search. Both species completed enrichment, the lifelist reached 2, related text search returned the bird sighting, and the trail records survived a backend restart.
 - Browser checks at desktop and 390-pixel phone breakpoints. Populated timeline, lifelist, species profile and stats rendered from the verified fixtures. Fixtures remain in isolated storage; the actual journal is empty.
 - A 20-second silent interface walkthrough is embedded in How it works. It shows test fixtures, not a field expedition.
+- Real Atlas connection verified with TLS certificate validation using the trusted certifi CA bundle. Four sightings, four species profiles and one trip migrated with user approval; local copies retained. Live basecamp reads Atlas successfully.
+- Atlas `sighting_embeddings` index verified READY and queryable. All four migrated sightings have embeddings. A related text query returned HTTP 200 with the Atlas search engine.
 
 Machine-readable evidence: [docs/validation.json](docs/validation.json). The full local integration proof (including generated field notes) is retained in the ignored data/integration-1791756084/proof.json. Screenshots are in docs/demo-frames/ and docs/field-preview.jpg.
 
 ## Pending acceptance checks
 
 - **Physical phone + disconnected internet:** requires the user's phone and a working local Wi-Fi network. Trusted local HTTPS is needed for browser microphone, GPS and PWA; plain HTTP supports file capture. Follow README's airplane-mode procedure.
-- **Atlas persistence + Atlas Vector Search:** no MONGODB_URI was supplied. The MongoDB adapter, collections, sync ingestion, embeddings and index definition are implemented. Tested the SQLite basecamp fallback and real local cosine search; this does not certify Atlas acceptance.
 - **Render deployment:** Dockerfile/render.yaml are provided; no remote project, billing or credentials were configured. Container image build was not run here (no Docker runtime verified). Render's same-machine Ollama requires enough RAM/disk; CPU inference can be slow.
 - **ElevenLabs transcription:** endpoint is gated to basecamp and authenticated; no API key was supplied, so actual transcription is untested. Offline audio storage/playback is verified.
 - **Fifteen-minute reproduction:** guide and bootstrap are supplied; not independently timed on a stranger's machine. Model downloads can exceed the target on a slow connection.
