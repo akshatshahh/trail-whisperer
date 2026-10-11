@@ -58,8 +58,20 @@
   "restart_persistence": true,
   "not_verified": [
     "physical phone airplane-mode LAN",
-    "Atlas storage and Vector Search",
     "Render deploy",
     "ElevenLabs transcription"
-  ]
+  ],
+  "atlas_verification": {
+    "connected": true,
+    "tls_certificate_validation": true,
+    "sightings": 4,
+    "species_profiles": 4,
+    "trips": 1,
+    "embedding_count": 4,
+    "index": "sighting_embeddings",
+    "index_status": "READY",
+    "queryable": true,
+    "search_http_status": 200,
+    "engine": "atlas"
+  }
 }
