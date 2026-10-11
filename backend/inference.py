@@ -6,6 +6,8 @@ from fastapi import HTTPException
 
 MODEL = os.getenv('OLLAMA_MODEL', 'gemma3n')
 VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'gemma3:4b')
+if any('cloud' in name.lower() for name in (MODEL, VISION_MODEL)):
+    raise RuntimeError('Cloud model variants are forbidden. Choose downloaded local Gemma weights.')
 URL = os.getenv('OLLAMA_URL', 'http://127.0.0.1:11434').rstrip('/')
 if urlparse(URL).hostname not in {'localhost', '127.0.0.1', '::1'}:
     raise RuntimeError('OLLAMA_URL must be loopback: AI inference always runs on this machine.')
@@ -55,7 +57,7 @@ def identify_audio(path):
         if official:
             try:
                 subprocess.run([sys.executable, '-m', 'backend.birdnet_worker', str(wav), tmp, str(Path(os.getenv('BIRDNET_DIR', 'birdnet_models')).resolve())], check=True, capture_output=True, timeout=120)
-                for file in Path(tmp).rglob('*.csv'):
+                for file in Path(tmp).rglob('*.BirdNET.results.csv'):
                     with file.open() as stream:
                         for row in csv.DictReader(stream):
                             detections.append({'common': row.get('Common name', row.get('Common Name', 'Unknown')), 'scientific': row.get('Scientific name', row.get('Scientific Name', '')), 'confidence': float(row['Confidence'])})

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: trail-whisperer-basecamp
+    runtime: docker
+    plan: pro_plus
+    healthCheckPath: /api/health
+    disk:
+      name: trail-memory
+      mountPath: /app/data
+      sizeGB: 30
+    envVars:
+      - key: MODE
+        value: basecamp
+      - key: OLLAMA_MODEL
+        value: gemma3n
+      - key: OLLAMA_VISION_MODEL
+        value: gemma3:4b
+      - key: OLLAMA_NO_CLOUD
+        value: '1'
+      - key: MONGODB_URI
+        sync: false
+      - key: SYNC_TOKEN
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false

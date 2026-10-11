@@ -182,6 +182,20 @@ def transcribe(q: Transcription, x_sync_token: str | None = Header(None)):
     store.put('sightings', s)
     return s
 
+def wikipedia_profile(name, scientific):
+    headers = {'User-Agent': 'TrailWhisperer/1.0 (educational field journal; https://github.com/birdnet-team/BirdNET-Analyzer)'}
+    for title in dict.fromkeys([scientific, name]):
+        if not title:
+            continue
+        try:
+            wiki = external('GET', 'https://en.wikipedia.org/api/rest_v1/page/summary/' + quote(title, safe=''), headers=headers).json()
+        except httpx.HTTPError:
+            response = external('GET', 'https://en.wikipedia.org/w/api.php', params={'action': 'query', 'format': 'json', 'prop': 'extracts|pageimages', 'exintro': 1, 'explaintext': 1, 'redirects': 1, 'titles': title, 'pithumbsize': 600}, headers=headers).json()
+            wiki = next(iter(response['query']['pages'].values()))
+        if wiki.get('extract'):
+            return {'summary': wiki['extract'], 'image': wiki.get('thumbnail', {}).get('source'), 'source': wiki.get('content_urls', {}).get('desktop', {}).get('page') or 'https://en.wikipedia.org/wiki/' + quote(wiki.get('title', title).replace(' ', '_'), safe='')}
+    raise ValueError('Wikipedia summary not found')
+
 def enrich(ids):
     # Durable status allows explicit retry after models/connectivity recover.
     for id in ids:
@@ -193,8 +207,7 @@ def enrich(ids):
         profile = store.get('species', name) or {'id': name, 'name': name, 'scientific': s['scientific'], 'kind': s['kind']}
         if not profile.get('summary'):
             try:
-                wiki = external('GET', 'https://en.wikipedia.org/api/rest_v1/page/summary/' + quote(s['scientific'] or name, safe=''), headers={'User-Agent': 'TrailWhisperer/1.0 (educational field journal)'}).json()
-                profile.update(summary=wiki.get('extract', ''), image=wiki.get('thumbnail', {}).get('source'), source=wiki.get('content_urls', {}).get('desktop', {}).get('page'))
+                profile.update(wikipedia_profile(name, s['scientific']))
             except Exception as e:
                 errors.append('Wikipedia: ' + str(e)[:100])
         if not profile.get('field_notes'):
@@ -222,8 +235,9 @@ def ingest(batch: SyncBatch, tasks: BackgroundTasks, x_sync_token: str | None = 
     accepted = []
     for sighting in batch.sightings:
         existing = store.get('sightings', sighting.id)
-        if not existing:
-            record(sighting)
+        row = record(sighting)
+        if existing:
+            store.put('sightings', {**existing, **row})
         accepted.append(sighting.id)
     tasks.add_task(enrich, accepted)
     return {'accepted_ids': accepted, 'enrichment': 'queued'}
