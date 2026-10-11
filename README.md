@@ -30,7 +30,7 @@ Requires Python 3.12, Node 22+, [Ollama](https://ollama.com), and enough disk/RA
 2. In the project directory, while online:
    ```sh
    bash scripts/bootstrap.sh
-   cp .env.example .env
+   cp -n .env.example .env
    ```
    This installs dependencies, downloads BirdNET models/labels into `birdnet_models/`, pulls Ollama models, checks real text/vision/embedding inference and builds React. imageio-ffmpeg includes a local ffmpeg executable if a system binary is unavailable. Downloading is setup, never a trail action.
 3. Start the app:
@@ -117,7 +117,7 @@ The three Atlas collections are `sightings`, `species`, `trips`. In Atlas create
 - `GET /api/similar?query_text=...`: basecamp semantic text search. Image-query search is deferred.
 - `GET /api/trips`, `GET /api/stats`, `GET /api/health`.
 
-Voice transcription is wired at the API level; the field UI stores voice notes and plays them back. Leaflet tiles are deferred: saved GPS points link to online OpenStreetMap. Put your recorded walkthrough at `frontend/public/demo.mp4`, rebuild, and the How it works dialog embeds it. No fake demo footage or synthetic sightings are included by default.
+Voice transcription is wired at the API level; the field UI stores voice notes and plays them back. Leaflet tiles are deferred: saved GPS points link to online OpenStreetMap. A silent interface walkthrough at `frontend/public/demo.mp4` shows the verified bird/flower fixtures in isolated test storage. It is embedded in How it works and is not a physical trail recording. Replace it with your submission recording and rebuild. No sample sightings are seeded into your actual journal.
 
 ## Validation
 

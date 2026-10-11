@@ -99,8 +99,11 @@ def record(s):
 def session_trip(day):
     # Stable per installation/day; independent trail devices never collide.
     identity = DATA / 'device-id'
-    if not identity.exists():
-        identity.write_text(str(uuid.uuid4()))
+    try:
+        with identity.open('x') as stream:
+            stream.write(str(uuid.uuid4()))
+    except FileExistsError:
+        pass
     return identity.read_text().strip() + ':' + day
 
 def rebuild_trips():
@@ -115,7 +118,7 @@ def rebuild_trips():
 
 @app.get('/api/health')
 def health():
-    return {'mode': MODE, 'model': inference.MODEL, 'vision_model': inference.VISION_MODEL, 'cloud_calls_this_session': cloud_calls, 'session_id': session_id, 'storage': 'atlas' if store.mongo is not None else 'sqlite', 'timezone': str(TZ), 'today': datetime.now(TZ).date().isoformat()}
+    return {'mode': MODE, 'model': inference.MODEL, 'vision_model': inference.VISION_MODEL, 'cloud_calls_this_session': cloud_calls + store.cloud_calls, 'session_id': session_id, 'storage': 'atlas' if store.mongo is not None else 'sqlite', 'timezone': str(TZ), 'today': datetime.now(TZ).date().isoformat()}
 
 @app.get('/api/sightings')
 def sightings():

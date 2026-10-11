@@ -90,3 +90,18 @@ def test_voice_saved_offline(app,client):
     assert r.status_code==200
     assert r.json()['kind']=='journal'
     assert app.cloud_calls==0
+
+def test_birdnet_result_parser_ignores_settings_and_filters(app,tmp_path,monkeypatch):
+    import subprocess
+    inf=app.inference
+    monkeypatch.setattr(inf.importlib.util,'find_spec',lambda name:object())
+    monkeypatch.setattr(inf,'ffmpeg',lambda:'ffmpeg')
+    def fake_run(args,**kw):
+        if '-m' in args:
+            out=__import__('pathlib').Path(args[4])
+            (out/'BirdNET_analysis_params.csv').write_text('Sample rate,Overlap\n48000,0\n')
+            (out/'clip.BirdNET.results.csv').write_text('Scientific name,Common name,Confidence\na,A,.7\na,A,.9\nb,B,.49\nc,C,.8\nd,D,.6\ne,E,.55\n')
+        return subprocess.CompletedProcess(args,0)
+    monkeypatch.setattr(inf.subprocess,'run',fake_run)
+    results=inf.identify_audio(tmp_path/'bird.wav')
+    assert [(r['common'],r['confidence']) for r in results]==[('A',.9),('C',.8),('D',.6)]

@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-11",
+  "automated_tests": 8,
+  "audio": [
+    {
+      "common": "Black-capped Chickadee",
+      "scientific": "Poecile atricapillus",
+      "confidence": 0.8141
+    }
+  ],
+  "photo": {
+    "label": "Rose",
+    "scientific": "Rosa spp.",
+    "kind": "plant",
+    "description": "The image shows a cluster of red roses with green leaves. The roses have a classic, velvety appearance.",
+    "caution": "This image only shows the plant itself. Do not ingest any part of the plant. There is no information about potential toxicity.",
+    "uncertainty": "The exact species of rose is unknown based on this image alone. It is a common rose (Rosa spp.).",
+    "photo_path": "/media/cb616554-eba2-4a03-873b-d4f83287c4da.jpg"
+  },
+  "trail_health_before_sync": {
+    "mode": "trail",
+    "model": "gemma3n",
+    "vision_model": "gemma3:4b",
+    "cloud_calls_this_session": 0,
+    "session_id": "92fa80c0-bbb6-40b9-9a7f-f340627af466",
+    "storage": "sqlite",
+    "timezone": "America/Los_Angeles",
+    "today": "2026-10-11"
+  },
+  "local_sync": {
+    "synced": 2,
+    "remaining": 0
+  },
+  "enrichment": [
+    {
+      "species": "Rose",
+      "status": "complete",
+      "embedding_dimensions": 768
+    },
+    {
+      "species": "Black-capped Chickadee",
+      "status": "complete",
+      "embedding_dimensions": 768
+    }
+  ],
+  "lifelist_count": 2,
+  "search_engine": "local cosine",
+  "search_results": [
+    {
+      "species": "Black-capped Chickadee",
+      "score": 0.7139070096566702
+    },
+    {
+      "species": "Rose",
+      "score": 0.4865828737975403
+    }
+  ],
+  "restart_persistence": true,
+  "not_verified": [
+    "physical phone airplane-mode LAN",
+    "Atlas storage and Vector Search",
+    "Render deploy",
+    "ElevenLabs transcription"
+  ]
+}
