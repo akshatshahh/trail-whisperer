@@ -9,3 +9,13 @@ birdnet_models/*
 !birdnet_models/.gitkeep
 *.log
 data-basecamp/
+.env.*
+!.env.example
+*credentials*.env
+data-*/
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.pem
+*.key
+.DS_Store
