@@ -163,3 +163,23 @@ def test_research_failure_keeps_wikipedia_enrichment_functional(app,client,monke
     p=app.store.get('species','Oak')
     assert p['summary']=='An oak tree.' and p['field_notes']=='Existing field notes'
     assert app.store.get('sightings',s['id'])['embedding']==[.1,.2]
+
+def test_sync_tracks_destination_and_resends_media_on_target_change(app,client,monkeypatch):
+    from pathlib import Path
+    import json
+    row=client.post('/api/sightings',json={'species':'Squirrel','kind':'mammal','photo_path':'/media/photo.jpg'}).json()
+    (app.MEDIA/'photo.jpg').write_bytes(b'photo-original')
+    row.update(synced=True,synced_to='http://localhost:8001');app.store.put('sightings',row)
+    monkeypatch.setenv('BASECAMP_URL','https://deployed.example');monkeypatch.setenv('SYNC_TOKEN','test-token')
+    assert client.get('/api/sightings').json()[0]['synced'] is False
+    real_client=httpx.Client;payloads=[]
+    def handler(request):
+        payloads.append(json.loads(request.content))
+        return httpx.Response(200,json={'accepted_ids':[row['id']]})
+    monkeypatch.setattr(app.httpx,'Client',lambda *a,**kw:real_client(transport=httpx.MockTransport(handler),**kw))
+    assert client.post('/api/sync').json()['synced']==1
+    assert base64.b64decode(payloads[0]['media']['photo.jpg'])==b'photo-original'
+    assert app.store.get('sightings',row['id'])['synced_to']=='https://deployed.example'
+    assert client.post('/api/sync').json()['synced']==0
+    monkeypatch.setenv('BASECAMP_URL','https://another.example')
+    assert client.post('/api/sync').json()['synced']==1

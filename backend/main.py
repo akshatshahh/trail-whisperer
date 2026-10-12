@@ -69,6 +69,7 @@ class Sighting(BaseModel):
     audio_path: str | None = None
     note: str = Field('', max_length=10000)
     synced: bool = False
+    synced_to: str | None = None
 
 class Question(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
@@ -127,7 +128,11 @@ def health():
 
 @app.get('/api/sightings')
 def sightings():
-    return sorted(store.all('sightings'), key=lambda s: s['timestamp'], reverse=True)
+    rows=store.all('sightings')
+    target=os.getenv('BASECAMP_URL','').rstrip('/')
+    if MODE=='trail' and target:
+        rows=[{**s,'synced':bool(s.get('synced') and s.get('synced_to')==target)} for s in rows]
+    return sorted(rows,key=lambda s:s['timestamp'],reverse=True)
 
 @app.post('/api/sightings')
 def add_sighting(s: Sighting):
@@ -318,6 +323,7 @@ def sync():
                 ids = r.json()['accepted_ids']
             if row['id'] in ids:
                 row['synced'] = True
+                row['synced_to'] = url
                 store.put('sightings', row)
                 accepted.append(row['id'])
         except (httpx.HTTPError, KeyError, ValueError) as e:
