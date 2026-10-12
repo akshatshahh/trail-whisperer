@@ -2,6 +2,10 @@
 
 Implemented and committed both acts: local trail capture/identification and the basecamp memory book. The app is available at http://localhost:8000 while the local server runs.
 
+## Current status
+
+The application is local-only; no public hosted website is offered. The latest run passed 27 tests (18 backend and 9 frontend) and the production build. Zebra and Hollywood test entries were removed; retained photos are labeled demo data. Earlier counts and deployment checks below are historical evidence, not current hosting availability.
+
 ## Passed
 
 - Production React/Vite build, with app-shell PWA caching.
@@ -13,7 +17,7 @@ Implemented and committed both acts: local trail capture/identification and the 
 - Two isolated live local services: identify → save → sync media + records → real Wikipedia API summary → local Gemma field notes → local embeddings → semantic search. Both species completed enrichment, the lifelist reached 2, related text search returned the bird sighting, and the trail records survived a backend restart.
 - Browser checks at desktop and 390-pixel phone breakpoints. Populated timeline, lifelist, species profile and stats rendered from the verified fixtures. Fixtures remain in isolated storage; the actual journal is empty.
 - A 20-second silent interface walkthrough is embedded in How it works. It shows test fixtures, not a field expedition.
-- Real Atlas connection verified with TLS certificate validation using the trusted certifi CA bundle. Four sightings, four species profiles and one trip migrated with user approval; local copies retained. Live basecamp reads Atlas successfully.
+- Real Atlas connection verified with TLS certificate validation using the trusted certifi CA bundle. Four sightings, four species profiles and one trip migrated with user approval; local copies retained. Local basecamp reads Atlas successfully.
 - Atlas `sighting_embeddings` index verified READY and queryable. All four migrated sightings have embeddings. A related text query returned HTTP 200 with the Atlas search engine.
 
 Machine-readable evidence: [docs/validation.json](docs/validation.json). The full local integration proof (including generated field notes) is retained in the ignored data/integration-1791756084/proof.json. Screenshots are in docs/demo-frames/ and docs/field-preview.jpg.
@@ -21,8 +25,6 @@ Machine-readable evidence: [docs/validation.json](docs/validation.json). The ful
 ## Pending acceptance checks
 
 - **Physical phone + disconnected internet:** requires the user's phone and a working local Wi-Fi network. Trusted local HTTPS is needed for browser microphone, GPS and PWA; plain HTTP supports file capture. Follow README's airplane-mode procedure.
-- **Render media transfer:** deployment is live; frontend/health, sync authentication and Atlas semantic search returned HTTP 200. Existing local photo/audio transfer to the deployed persistent disk has not been verified. CPU inference can be slow.
-- **Hosted ElevenLabs transcription:** the project owner has now checked and confirmed it working. The separate automated local check transcribed a generated seven-second recording and summarized it with Gemma (HTTP 200).
 - **Fifteen-minute reproduction:** guide and bootstrap are supplied; not independently timed on a stranger's machine. Model downloads can exceed the target on a slow connection.
 
 ## Scoped omissions
@@ -52,10 +54,9 @@ Eight additional regressions pass, bringing the total to 23 (16 backend/integrat
 
 Both providers now have credentials and passed local live verification. `scripts/check_sponsors.py` performs the synthetic-data live check; confirm Sentry dashboard receipt separately.
 
-Sentry follow-up: a synthetic real local-Gemma trace was sent to the configured project and ingestion returned HTTP 200. Render now reports Sentry enabled; dashboard receipt of deployed traces remains to be confirmed. No prompts, credentials or private journal records were included in the trace.
+Sentry follow-up: a synthetic real local-Gemma trace was sent to the configured project and ingestion returned HTTP 200. No prompts, credentials or private journal records were included in the trace.
 
-SerpApi follow-up: a real public-species search returned three reference links and local Gemma generated sourced field notes. The combined sponsor check flushed research/model traces to Sentry using temporary SQLite data; no personal journal records were accessed or changed. Render health now reports both sponsors enabled.
+SerpApi follow-up: a real public-species search returned three reference links and local Gemma generated sourced field notes. The combined sponsor check flushed research/model traces to Sentry using temporary SQLite data; no personal journal records were accessed or changed.
 
-Deployed sponsor recheck: Render health returned HTTP 200 with `sentry: true` and `serpapi: true`. Authenticated `/api/research` completed with HTTP 200, three reference links and generated local-model field notes. This confirms the hosted research workflow. Dashboard receipt of the deployed Sentry trace is still unconfirmed; the earlier real local trace was accepted by Sentry ingestion with HTTP 200.
 
-Latest owner verification: the project owner confirmed that the deployed ElevenLabs and Sentry integrations are working. This supersedes earlier pending statements about those two checks. Automated evidence remains distinguished from owner-confirmed verification.
+Latest owner verification: the project owner confirmed that ElevenLabs and Sentry are working. This supersedes earlier pending statements about those two checks. Automated evidence remains distinguished from owner-confirmed verification.

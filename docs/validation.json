@@ -57,8 +57,7 @@
   ],
   "restart_persistence": true,
   "not_verified": [
-    "physical phone airplane-mode LAN",
-    "Full Render media transfer"
+    "physical phone airplane-mode LAN"
   ],
   "atlas_verification": {
     "connected": true,
@@ -89,14 +88,6 @@
     "physical_phone_test": false,
     "browser_internet_disabled": false
   },
-  "render_verification": {
-    "url": "https://trail-whisperer-basecamp.onrender.com",
-    "frontend_http": 200,
-    "health_http": 200,
-    "storage": "atlas",
-    "sync_auth_http": 200,
-    "semantic_search_http": 200
-  },
   "elevenlabs_verification": {
     "synthetic_audio": true,
     "duration_seconds": 7,
@@ -112,20 +103,21 @@
       "live_verified": false,
       "ingestion_http_status": 200,
       "real_local_gemma_trace": true,
-      "render_enabled": true,
-      "dashboard_receipt_confirmed": true,
-      "deployed_verification_source": "project owner"
+      "dashboard_receipt_confirmed": true
     },
     "serpapi": {
       "implemented": true,
       "regression_tested": true,
       "live_verified": true,
       "reference_links": 3,
-      "local_gemma_notes_verified": true,
-      "render_enabled": true,
-      "deployed_research_http": 200,
-      "deployed_reference_links": 3,
-      "deployed_field_notes": true
+      "local_gemma_notes_verified": true
     }
+  },
+  "current_availability": {
+    "mode": "local-only",
+    "public_website": false,
+    "backend_tests_passed": 18,
+    "frontend_tests_passed": 9,
+    "production_build_passed": true
   }
 }
