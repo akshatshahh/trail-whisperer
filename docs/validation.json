@@ -112,7 +112,7 @@
       "live_verified": false,
       "ingestion_http_status": 200,
       "real_local_gemma_trace": true,
-      "render_enabled": false,
+      "render_enabled": true,
       "dashboard_receipt_confirmed": false
     },
     "serpapi": {
@@ -121,7 +121,10 @@
       "live_verified": true,
       "reference_links": 3,
       "local_gemma_notes_verified": true,
-      "render_enabled": false
+      "render_enabled": true,
+      "deployed_research_http": 200,
+      "deployed_reference_links": 3,
+      "deployed_field_notes": true
     }
   }
 }
