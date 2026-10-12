@@ -23,3 +23,7 @@ services:
         sync: false
       - key: ELEVENLABS_API_KEY
         sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: SERPAPI_API_KEY
+        sync: false

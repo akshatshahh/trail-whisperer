@@ -9,7 +9,7 @@ def app(tmp_path, monkeypatch):
     monkeypatch.setenv('DATA_DIR',str(tmp_path))
     monkeypatch.setenv('MODE','trail')
     # Empty values prevent load_dotenv from importing the user's real settings.
-    for key in ('MONGODB_URI', 'BASECAMP_URL', 'SYNC_TOKEN', 'ELEVENLABS_API_KEY'):
+    for key in ('MONGODB_URI', 'BASECAMP_URL', 'SYNC_TOKEN', 'ELEVENLABS_API_KEY', 'SENTRY_DSN', 'SERPAPI_API_KEY'):
         monkeypatch.setenv(key, '')
     from backend import main
     importlib.reload(main)
@@ -107,3 +107,59 @@ def test_birdnet_result_parser_ignores_settings_and_filters(app,tmp_path,monkeyp
     monkeypatch.setattr(inf.subprocess,'run',fake_run)
     results=inf.identify_audio(tmp_path/'bird.wav')
     assert [(r['common'],r['confidence']) for r in results]==[('A',.9),('C',.8),('D',.6)]
+
+def test_research_blocked_on_trail_even_with_key(app,client,monkeypatch):
+    monkeypatch.setenv('SERPAPI_API_KEY','private-test-key')
+    monkeypatch.setattr(app,'external',lambda *a,**kw:pytest.fail('Trail attempted research network'))
+    r=client.post('/api/research',json={'species':'Oak'},headers={'X-Sync-Token':'anything'})
+    assert r.status_code==403
+    assert app.cloud_calls==0
+
+def test_research_auth_missing_key_and_cache(app,client,monkeypatch):
+    app.MODE='basecamp';monkeypatch.setenv('MODE','basecamp');monkeypatch.setenv('SYNC_TOKEN','test-token')
+    app.store.put('species',{'id':'Oak','name':'Oak','scientific':'Quercus','summary':'A tree.'})
+    assert client.post('/api/research',json={'species':'Oak'}).status_code==401
+    headers={'X-Sync-Token':'test-token'}
+    assert client.post('/api/research',json={'species':'Oak'},headers=headers).status_code==503
+    monkeypatch.setenv('SERPAPI_API_KEY','private-test-key')
+    calls=[]
+    def provider(*a,**kw):
+        calls.append(kw)
+        return httpx.Response(200,json={'organic_results':[{'title':'Oak identification','link':'https://example.edu/oak','snippet':'Lobed leaves.'},{'title':'Invalid','link':'javascript:alert(1)'},{'title':'Duplicate','link':'https://example.edu/oak'}]})
+    monkeypatch.setattr(app,'external',provider)
+    monkeypatch.setattr(app.inference,'generate',lambda prompt:'Grounded field notes')
+    first=client.post('/api/research',json={'species':'Oak'},headers=headers)
+    assert first.status_code==200
+    assert len(first.json()['sources'])==1
+    assert first.json()['field_notes']=='Grounded field notes'
+    assert len(calls)==1
+    second=client.post('/api/research',json={'species':'Oak'},headers=headers)
+    assert second.status_code==200 and len(calls)==1
+    assert calls[0]['params']['q']=='Quercus identification habitat natural history'
+    assert 'private-test-key' not in first.text
+
+def test_research_failure_does_not_leak_api_key(app,client,monkeypatch):
+    app.MODE='basecamp';monkeypatch.setenv('MODE','basecamp');monkeypatch.setenv('SYNC_TOKEN','test-token');monkeypatch.setenv('SERPAPI_API_KEY','private-test-key')
+    app.store.put('species',{'id':'Oak','name':'Oak','field_notes':'Existing notes'})
+    def provider(*a,**kw):
+        request=httpx.Request('GET','https://serpapi.com/search.json?api_key=private-test-key')
+        response=httpx.Response(401,request=request)
+        raise httpx.HTTPStatusError('private-test-key',request=request,response=response)
+    monkeypatch.setattr(app,'external',provider)
+    r=client.post('/api/research',json={'species':'Oak'},headers={'X-Sync-Token':'test-token'})
+    assert r.status_code==502
+    assert 'private-test-key' not in r.text
+    assert app.store.get('species','Oak')['field_notes']=='Existing notes'
+
+def test_research_failure_keeps_wikipedia_enrichment_functional(app,client,monkeypatch):
+    app.MODE='basecamp';monkeypatch.setenv('MODE','basecamp');monkeypatch.setenv('SERPAPI_API_KEY','private-test-key')
+    monkeypatch.setattr(app,'wikipedia_profile',lambda *a:{'summary':'An oak tree.'})
+    monkeypatch.setattr(app.inference,'generate',lambda *a,**kw:'Existing field notes')
+    monkeypatch.setattr(app.inference,'embed',lambda *a:[.1,.2])
+    from fastapi import HTTPException
+    monkeypatch.setattr(app.research,'search_species',lambda *a:(_ for _ in ()).throw(HTTPException(502,'Provider unavailable')))
+    s=client.post('/api/sightings',json={'species':'Oak','kind':'plant'}).json()
+    app.enrich([s['id']])
+    p=app.store.get('species','Oak')
+    assert p['summary']=='An oak tree.' and p['field_notes']=='Existing field notes'
+    assert app.store.get('sightings',s['id'])['embedding']==[.1,.2]

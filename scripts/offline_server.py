@@ -6,7 +6,7 @@ import os, sys, socket, tempfile
 from pathlib import Path
 from contextlib import nullcontext
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-os.environ.update(MODE='trail', MONGODB_URI='', BASECAMP_URL='', SYNC_TOKEN='', ELEVENLABS_API_KEY='')
+os.environ.update(MODE='trail', MONGODB_URI='', BASECAMP_URL='', SYNC_TOKEN='', ELEVENLABS_API_KEY='', SENTRY_DSN='', SERPAPI_API_KEY='')
 allowed={'localhost','127.0.0.1','::1'}
 original_connect=socket.socket.connect
 original_connect_ex=socket.socket.connect_ex

@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 import httpx
 from fastapi import HTTPException
+from .telemetry import trace, record_usage
 
 MODEL = os.getenv('OLLAMA_MODEL', 'gemma3n')
 VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'gemma3:4b')
@@ -20,17 +21,19 @@ def generate(prompt, image=None, structured=False):
     if structured:
         payload['format'] = 'json'
     try:
-        with httpx.Client(timeout=180, trust_env=False) as client:
+        with trace('photo.identify' if image else 'text.generate', op='gen_ai.chat', model=payload['model']) as span, httpx.Client(timeout=180, trust_env=False) as client:
             r = client.post(URL + '/api/generate', json=payload)
             r.raise_for_status()
-            answer = r.json()['response']
+            response = r.json()
+            record_usage(span, response)
+            answer = response['response']
         return json.loads(answer) if structured else answer
     except (httpx.HTTPError, ValueError, KeyError) as e:
         raise HTTPException(503, f'Local model unavailable ({MODEL}). Start Ollama and pull the model. {str(e)[:120]}')
 
 def embed(text):
     try:
-        with httpx.Client(timeout=120, trust_env=False) as client:
+        with trace('sighting.embed', op='gen_ai.embeddings', model='nomic-embed-text') as span, httpx.Client(timeout=120, trust_env=False) as client:
             r = client.post(URL + '/api/embed', json={'model': 'nomic-embed-text', 'input': text})
             r.raise_for_status()
             return r.json()['embeddings'][0]
