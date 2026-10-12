@@ -58,8 +58,7 @@
   "restart_persistence": true,
   "not_verified": [
     "physical phone airplane-mode LAN",
-    "Full Render media transfer",
-    "Full hosted ElevenLabs transcription"
+    "Full Render media transfer"
   ],
   "atlas_verification": {
     "connected": true,
@@ -103,7 +102,8 @@
     "duration_seconds": 7,
     "local_pipeline_http": 200,
     "local_gemma_summary": true,
-    "hosted_pipeline_tested": false
+    "hosted_pipeline_tested": true,
+    "hosted_verification_source": "project owner"
   },
   "new_sponsors": {
     "sentry": {
@@ -113,7 +113,8 @@
       "ingestion_http_status": 200,
       "real_local_gemma_trace": true,
       "render_enabled": true,
-      "dashboard_receipt_confirmed": false
+      "dashboard_receipt_confirmed": true,
+      "deployed_verification_source": "project owner"
     },
     "serpapi": {
       "implemented": true,

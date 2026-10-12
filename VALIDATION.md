@@ -22,7 +22,7 @@ Machine-readable evidence: [docs/validation.json](docs/validation.json). The ful
 
 - **Physical phone + disconnected internet:** requires the user's phone and a working local Wi-Fi network. Trusted local HTTPS is needed for browser microphone, GPS and PWA; plain HTTP supports file capture. Follow README's airplane-mode procedure.
 - **Render media transfer:** deployment is live; frontend/health, sync authentication and Atlas semantic search returned HTTP 200. Existing local photo/audio transfer to the deployed persistent disk has not been verified. CPU inference can be slow.
-- **Hosted ElevenLabs transcription:** the complete local basecamp endpoint transcribed a generated seven-second test recording with ElevenLabs, then summarized it with local Gemma (HTTP 200). Render has a key configured, but full hosted transcription has not been tested. Personal voice notes were untouched.
+- **Hosted ElevenLabs transcription:** the project owner has now checked and confirmed it working. The separate automated local check transcribed a generated seven-second recording and summarized it with Gemma (HTTP 200).
 - **Fifteen-minute reproduction:** guide and bootstrap are supplied; not independently timed on a stranger's machine. Model downloads can exceed the target on a slow connection.
 
 ## Scoped omissions
@@ -57,3 +57,5 @@ Sentry follow-up: a synthetic real local-Gemma trace was sent to the configured 
 SerpApi follow-up: a real public-species search returned three reference links and local Gemma generated sourced field notes. The combined sponsor check flushed research/model traces to Sentry using temporary SQLite data; no personal journal records were accessed or changed. Render health now reports both sponsors enabled.
 
 Deployed sponsor recheck: Render health returned HTTP 200 with `sentry: true` and `serpapi: true`. Authenticated `/api/research` completed with HTTP 200, three reference links and generated local-model field notes. This confirms the hosted research workflow. Dashboard receipt of the deployed Sentry trace is still unconfirmed; the earlier real local trace was accepted by Sentry ingestion with HTTP 200.
+
+Latest owner verification: the project owner confirmed that the deployed ElevenLabs and Sentry integrations are working. This supersedes earlier pending statements about those two checks. Automated evidence remains distinguished from owner-confirmed verification.
