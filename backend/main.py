@@ -10,7 +10,7 @@ load_dotenv()
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from PIL import Image, UnidentifiedImageError
 from .store import Store
 from . import inference, telemetry, research
@@ -70,6 +70,11 @@ class Sighting(BaseModel):
     note: str = Field('', max_length=10000)
     synced: bool = False
     synced_to: str | None = None
+
+    @field_validator('trail_name')
+    @classmethod
+    def normalize_trail_name(cls, value):
+        return value.strip() or 'Unnamed trail'
 
 class Question(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
@@ -355,7 +360,7 @@ def stats():
     rows = [s for s in sightings() if s['kind'] != 'journal']
     counts = Counter(s['species'] for s in rows)
     months = Counter(s['timestamp'][:7] for s in rows)
-    trails = sorted({s['trail_name'] for s in rows})
+    trails = sorted({s['trail_name'].strip() for s in rows if s.get('trail_name', '').strip() and s['trail_name'].strip() != 'Unnamed trail'})
     badges = []
     if len({s['species'] for s in rows if s['kind'] == 'bird'}) >= 10: badges.append('10 birds')
     if any(s['kind'] == 'mammal' for s in rows): badges.append('First mammal')

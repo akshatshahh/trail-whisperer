@@ -183,3 +183,13 @@ def test_sync_tracks_destination_and_resends_media_on_target_change(app,client,m
     assert client.post('/api/sync').json()['synced']==0
     monkeypatch.setenv('BASECAMP_URL','https://another.example')
     assert client.post('/api/sync').json()['synced']==1
+
+
+def test_blank_trail_names_are_not_visited_trails(app, client):
+    saved = client.post('/api/sightings', json={'species': 'Oak', 'trail_name': '  '}).json()
+    assert saved['trail_name'] == 'Unnamed trail'
+    # Older records may still contain empty names.
+    app.store.put('sightings', {**saved, 'id': 'legacy', 'trail_name': ''})
+    assert client.get('/api/stats').json()['trails_visited'] == []
+    client.post('/api/sightings', json={'species': 'Pine', 'trail_name': ' Wildcat Canyon '})
+    assert client.get('/api/stats').json()['trails_visited'] == ['Wildcat Canyon']
