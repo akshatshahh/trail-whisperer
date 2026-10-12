@@ -21,8 +21,8 @@ Machine-readable evidence: [docs/validation.json](docs/validation.json). The ful
 ## Pending acceptance checks
 
 - **Physical phone + disconnected internet:** requires the user's phone and a working local Wi-Fi network. Trusted local HTTPS is needed for browser microphone, GPS and PWA; plain HTTP supports file capture. Follow README's airplane-mode procedure.
-- **Render deployment:** Dockerfile/render.yaml are provided; no remote project, billing or credentials were configured. Container image build was not run here (no Docker runtime verified). Render's same-machine Ollama requires enough RAM/disk; CPU inference can be slow.
-- **ElevenLabs transcription:** endpoint is gated to basecamp and authenticated; no API key was supplied, so actual transcription is untested. Offline audio storage/playback is verified.
+- **Render media transfer:** deployment is live; frontend/health, sync authentication and Atlas semantic search returned HTTP 200. Existing local photo/audio transfer to the deployed persistent disk has not been verified. CPU inference can be slow.
+- **Hosted ElevenLabs transcription:** the complete local basecamp endpoint transcribed a generated seven-second test recording with ElevenLabs, then summarized it with local Gemma (HTTP 200). Render has a key configured, but full hosted transcription has not been tested. Personal voice notes were untouched.
 - **Fifteen-minute reproduction:** guide and bootstrap are supplied; not independently timed on a stranger's machine. Model downloads can exceed the target on a slow connection.
 
 ## Scoped omissions

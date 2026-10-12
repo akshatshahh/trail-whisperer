@@ -58,8 +58,8 @@
   "restart_persistence": true,
   "not_verified": [
     "physical phone airplane-mode LAN",
-    "Render deploy",
-    "ElevenLabs transcription"
+    "Full Render media transfer",
+    "Full hosted ElevenLabs transcription"
   ],
   "atlas_verification": {
     "connected": true,
@@ -89,5 +89,20 @@
     "backend_restart_persistence": true,
     "physical_phone_test": false,
     "browser_internet_disabled": false
+  },
+  "render_verification": {
+    "url": "https://trail-whisperer-basecamp.onrender.com",
+    "frontend_http": 200,
+    "health_http": 200,
+    "storage": "atlas",
+    "sync_auth_http": 200,
+    "semantic_search_http": 200
+  },
+  "elevenlabs_verification": {
+    "synthetic_audio": true,
+    "duration_seconds": 7,
+    "local_pipeline_http": 200,
+    "local_gemma_summary": true,
+    "hosted_pipeline_tested": false
   }
 }

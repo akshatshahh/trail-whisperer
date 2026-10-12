@@ -4,6 +4,27 @@
 
 Act I: listen to a bird or photograph a plant, save the discovery, put the phone away. Act II: at home, revisit a timeline, grow a lifelist, explore species field notes and search your own encounters.
 
+**Live basecamp:** [trail-whisperer-basecamp.onrender.com](https://trail-whisperer-basecamp.onrender.com/) · **Source:** [GitHub](https://github.com/akshatshahh/trail-whisperer) · **Evidence:** [VALIDATION.md](VALIDATION.md)
+
+The deployed basecamp needs internet. For offline trail use, open the laptop's LAN address on your phone as described below.
+
+## Technologies and sponsor integrations
+
+- **Gemma:** `gemma3n` for trail Q&A, field notes and journal summaries; `gemma3:4b` for vision. Ollama serves downloaded open-weight models locally on the laptop or on the same Render machine at basecamp. No Google/Gemini API key is used.
+- **Render:** Docker Blueprint deployment hosts FastAPI, the built frontend and loopback-only Ollama. Deployed frontend, Atlas-backed health, sync authentication and semantic search have returned HTTP 200.
+- **MongoDB Atlas:** `sightings`, `species` and `trips` collections store basecamp records. Atlas Vector Search uses local `nomic-embed-text` embeddings (768 dimensions, cosine). The index and real search results have been verified.
+- **ElevenLabs:** Scribe transcription is available only through the authenticated basecamp endpoint; the transcript is summarized by local Gemma. A real seven-second synthetic recording passed the complete local endpoint with HTTP 200. Render has its key configured, but full hosted transcription remains untested. Personal voice notes were not used for this check.
+
+Other building blocks: Python 3.12, FastAPI, Uvicorn, Pydantic, HTTPX, PyMongo, certifi, python-dotenv, Pillow, python-multipart, SQLite, official BirdNET-Analyzer/TensorFlow, ffmpeg/imageio-ffmpeg, React 19, Vite, vite-plugin-pwa/Workbox, Lucide icons, browser MediaRecorder/geolocation/camera APIs, Wikipedia APIs and OpenStreetMap coordinate links. Tests use pytest, Vitest, jsdom and React Testing Library. Git/GitHub retain incremental implementation commits; development used Codex. GitHub hosting is not claimed as Copilot use.
+
+Four partner technologies are demonstrated: Gemma, Render, MongoDB Atlas and ElevenLabs. Prize eligibility is determined by the challenge organizers. The other sponsor integrations discussed during planning have not been implemented and are not claimed.
+
+## Photo capture and the memory book
+
+**Identify photo** is available in the header and **Take photo** in field mode. The chooser offers phone-native camera capture, desktop webcam capture on HTTPS/localhost, and a separate image upload option. Denied/unavailable webcam access leaves upload available; camera tracks stop when the dialog closes. Review the model's description, uncertainty and caution before saving.
+
+The memory book includes a timeline with time filters, a lifelist, species profiles with Wikipedia context and Gemma field notes, encounter dates/GPS links, trips, statistics, milestones and semantic text search. The How it works dialog embeds a 20-second interface walkthrough made from public test fixtures.
+
 ## What runs where
 
 Phone → local hotspot → laptop FastAPI → **BirdNET / Ollama on that same laptop** → SQLite. No cloud inference and no cloud SDKs in identification, Q&A or journal summarization. All model assets must be downloaded before leaving home. The PWA caches the app shell, not inference: the laptop must remain reachable.
@@ -96,6 +117,10 @@ Push this repository to your Git provider and create a Render Blueprint from `re
 
 The Docker image builds the frontend and BirdNET assets. Its entrypoint runs **Ollama on the same Render machine**, loopback-only, cloud-disabled, and prepares local Gemma/embedding models. Render cannot reach your laptop's localhost. An ordinary free web service is insufficient: the blueprint proposes a paid 8 GB-class service and a persistent disk for media/models. Confirm the current plan availability and cost before deploying. CPU generation can be slow and concurrent requests contend for RAM. Use `OLLAMA_MODEL=gemma3:4b` if memory is limited; you can also set that in the blueprint. Models download once onto the persistent disk. Health means the API is live, not that all models are ready.
 
+Deployment fixes included in the repository: `zstd` is installed for Ollama archive extraction, Atlas TLS uses the trusted certifi CA bundle, and Uvicorn is explicitly limited to one worker. Add every service outbound CIDR range from Render's Connect → Outbound panel to Atlas's project IP access list. Keep TLS certificate verification enabled.
+
+Secrets belong in the ignored local `.env` or Render Environment settings: `MONGODB_URI`, matching `SYNC_TOKEN`, and optional `ELEVENLABS_API_KEY`. `BASECAMP_URL` belongs on the laptop and points to your deployed service. No actual credentials, user databases, personal uploads or local certificates are committed.
+
 Set the laptop's `BASECAMP_URL=https://<your-render-service>.onrender.com`. `/api/sync` sends one sighting with its media at a time. Basecamp acknowledges only after storage; local `synced` becomes true only for acknowledged IDs. Retries are idempotent. Background enrichment builds species summaries/field notes and adds each sighting's embedding; `enrichment_status=pending` survives failures. Retry after models/connectivity recover:
 
 ```sh
@@ -128,7 +153,9 @@ Voice transcription is wired at the API level; the field UI stores voice notes a
 .venv/bin/python scripts/check_models.py
 ```
 
-The test suite covers durable storage, daily trips, lifelist counts, API media contracts, missing optional keys, trail-mode blocking, idempotent ingest/enrichment, semantic fallback and failed-sync recovery. Mocked inference tests verify wiring, not model accuracy. See `VALIDATION.md` for real model checks and outstanding physical/cloud acceptance tests.
+**15 automated tests pass:** eight backend tests and seven frontend photo-flow tests. The production build passes. Real model checks identified a Rose photograph and a Black-capped Chickadee recording (0.8141 confidence). Local sync/enrichment, deployed Atlas semantic search and the local ElevenLabs-to-Gemma pipeline were also verified. Mocked inference tests verify wiring, not model accuracy. See `VALIDATION.md` for evidence and remaining acceptance limits.
+
+The offline regression server blocked external DNS/TCP while a 390-pixel browser uploaded, identified, saved and reloaded a plant photo. Real bird identification and Q&A also worked; records/media survived a backend restart and health stayed at zero cloud calls. This is a server-network-blocked simulation, not a physical phone hotspot test. The physical device test, broad identification accuracy, full Render media transfer and full hosted ElevenLabs transcription remain outstanding.
 
 ## Mobile/offline regression checks
 
