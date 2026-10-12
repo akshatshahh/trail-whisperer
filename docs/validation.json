@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "automated_tests": 15,
+  "automated_tests": 23,
   "audio": [
     {
       "common": "Black-capped Chickadee",
@@ -104,5 +104,17 @@
     "local_pipeline_http": 200,
     "local_gemma_summary": true,
     "hosted_pipeline_tested": false
+  },
+  "new_sponsors": {
+    "sentry": {
+      "implemented": true,
+      "sdk_envelope_tested": true,
+      "live_verified": false
+    },
+    "serpapi": {
+      "implemented": true,
+      "regression_tested": true,
+      "live_verified": false
+    }
   }
 }

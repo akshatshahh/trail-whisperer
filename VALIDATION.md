@@ -45,3 +45,9 @@ Flower photo: TensorFlow flower_photos archive, roses/14810868100_87eb739f26_m.j
 - All observed image/script/style/manifest URLs in the tested phone page were local paths. Browser-wide internet was not disabled; the backend network policy and page asset inspection are the limits of this simulation.
 - Screenshot: `docs/offline-mobile.jpg`. Repeatable commands: `scripts/offline_server.py` and `scripts/check_offline.py`. Detailed local proof is retained in ignored `data/offline-regression-proof.json`.
 - A physical phone hotspot/airplane-mode test and actual native camera capture are still unverified.
+
+## Sentry and SerpApi implementation
+
+Eight additional regressions pass, bringing the total to 23 (16 backend/integration + 7 frontend). Real Sentry SDK envelopes were captured in-memory: agent/model spans include token counts and failures while excluding tested secret values and journal content. Trail mode does not initialize Sentry even when a DSN is supplied. SerpApi tests verify trail blocking, token authorization, missing keys, seven-day caching, link filtering, safe provider errors and preservation of Wikipedia/embeddings during an optional provider failure. The build passes.
+
+Both new providers still require credentials and real external verification. They are implemented, not yet counted as demonstrated sponsor entries. `scripts/check_sponsors.py` performs a synthetic-data live test when keys are supplied; confirm Sentry dashboard receipt separately.

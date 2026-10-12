@@ -15,9 +15,12 @@ The deployed basecamp needs internet. For offline trail use, open the laptop's L
 - **MongoDB Atlas:** `sightings`, `species` and `trips` collections store basecamp records. Atlas Vector Search uses local `nomic-embed-text` embeddings (768 dimensions, cosine). The index and real search results have been verified.
 - **ElevenLabs:** Scribe transcription is available only through the authenticated basecamp endpoint; the transcript is summarized by local Gemma. A real seven-second synthetic recording passed the complete local endpoint with HTTP 200. Render has its key configured, but full hosted transcription remains untested. Personal voice notes were not used for this check.
 
+- **Sentry (implemented; live credentials pending):** opt-in basecamp agent/model traces report model names, durations, token counts and failure statuses. Automatic SDK integrations are disabled, and request bodies, prompts, recordings, location, credentials and raw exception values are excluded. Trail mode never initializes Sentry. Real SDK envelopes are tested with an in-memory transport; live dashboard receipt still needs verification.
+- **SerpApi (implemented; live credentials pending):** basecamp searches public species names/scientific names, keeps up to three organic reference links, and feeds snippets to local Gemma for sourced field notes. Results are cached for seven days. No GPS, personal journal text or uploaded media are sent to search. Tests verify authentication, caching, safe links and redacted provider errors; real provider verification still needs a key.
+
 Other building blocks: Python 3.12, FastAPI, Uvicorn, Pydantic, HTTPX, PyMongo, certifi, python-dotenv, Pillow, python-multipart, SQLite, official BirdNET-Analyzer/TensorFlow, ffmpeg/imageio-ffmpeg, React 19, Vite, vite-plugin-pwa/Workbox, Lucide icons, browser MediaRecorder/geolocation/camera APIs, Wikipedia APIs and OpenStreetMap coordinate links. Tests use pytest, Vitest, jsdom and React Testing Library. Git/GitHub retain incremental implementation commits; development used Codex. GitHub hosting is not claimed as Copilot use.
 
-Four partner technologies are demonstrated: Gemma, Render, MongoDB Atlas and ElevenLabs. Prize eligibility is determined by the challenge organizers. The other sponsor integrations discussed during planning have not been implemented and are not claimed.
+Four partner technologies are demonstrated: Gemma, Render, MongoDB Atlas and ElevenLabs. Sentry and SerpApi are implemented and regression-tested, awaiting keys and live verification before being claimed as demonstrated. Prize eligibility is determined by the challenge organizers. Other sponsor integrations discussed during planning have not been implemented and are not claimed.
 
 ## Photo capture and the memory book
 
@@ -138,6 +141,7 @@ The three Atlas collections are `sightings`, `species`, `trips`. In Atlas create
 - `POST /api/voicenote/transcribe`: basecamp only, token header, `{sighting_id}`; optional ElevenLabs transcription then local Gemma summary.
 - `POST /api/sync`: explicit at-home push from trail; `POST /api/sync/ingest`: basecamp receive, authenticated.
 - `POST /api/enrich`: authenticated, retry pending enrichment.
+- `POST /api/research`: basecamp only, token header, `{species, refresh?}`; cached SerpApi research and local Gemma notes for a synced species.
 - `GET /api/species`, `GET /api/species/{name}`: profile and your encounters.
 - `GET /api/similar?query_text=...`: basecamp semantic text search. Image-query search is deferred.
 - `GET /api/trips`, `GET /api/stats`, `GET /api/health`.
@@ -153,7 +157,7 @@ Voice transcription is wired at the API level; the field UI stores voice notes a
 .venv/bin/python scripts/check_models.py
 ```
 
-**15 automated tests pass:** eight backend tests and seven frontend photo-flow tests. The production build passes. Real model checks identified a Rose photograph and a Black-capped Chickadee recording (0.8141 confidence). Local sync/enrichment, deployed Atlas semantic search and the local ElevenLabs-to-Gemma pipeline were also verified. Mocked inference tests verify wiring, not model accuracy. See `VALIDATION.md` for evidence and remaining acceptance limits.
+**23 automated tests pass:** sixteen backend/integration tests and seven frontend photo-flow tests. The production build passes. Real model checks identified a Rose photograph and a Black-capped Chickadee recording (0.8141 confidence). Local sync/enrichment, deployed Atlas semantic search and the local ElevenLabs-to-Gemma pipeline were also verified. Mocked inference tests verify wiring, not model accuracy. See `VALIDATION.md` for evidence and remaining acceptance limits.
 
 The offline regression server blocked external DNS/TCP while a 390-pixel browser uploaded, identified, saved and reloaded a plant photo. Real bird identification and Q&A also worked; records/media survived a backend restart and health stayed at zero cloud calls. This is a server-network-blocked simulation, not a physical phone hotspot test. The physical device test, broad identification accuracy, full Render media transfer and full hosted ElevenLabs transcription remain outstanding.
 
@@ -181,3 +185,17 @@ This server runs on port 8004 with temporary SQLite/media storage, no optional k
 ```
 
 The check performs real photo/audio identification, saves/re-reads records, serves media, runs Q&A, checks online-action gates and verifies zero cloud calls. Open `http://localhost:8004` to exercise the same flow in a phone-width browser. A width test is not a physical iOS/Android camera or hotspot test. The full manual phone/LAN procedure above remains necessary for that acceptance criterion.
+
+## Enable Sentry and SerpApi at basecamp
+
+Add `SENTRY_DSN` (Sentry project Settings → Client Keys/DSN) and `SERPAPI_API_KEY` (SerpApi account API Key page) to your ignored `.env` for local basecamp and to Render's Environment settings for the deployed service. Restart/redeploy after changing them. Neither key is needed on the trail, and neither integration activates in `MODE=trail` even if keys are present.
+
+When configured, sync enrichment automatically researches newly encountered species. Existing species can be researched through authenticated `POST /api/research` with `{ "species": "Black-capped Chickadee" }` and the `X-Sync-Token` header. Set `refresh: true` to explicitly bypass the seven-day cache. Species profiles display the returned reference links. Missing keys, provider outages and quota errors keep the Wikipedia/local-model path functional.
+
+For a private, synthetic-data verification run with both new settings configured:
+
+```sh
+.venv/bin/python scripts/check_sponsors.py
+```
+
+The script researches a public species in temporary SQLite storage, invokes local Gemma and flushes Sentry traces. It does not access your actual journal. Confirm `species.research`, `gen_ai.invoke_agent`, `gen_ai.chat` and web-search spans in Sentry's trace/AI insights views before claiming live Sentry verification. The script never prints credentials. Trace sending is included in the session cloud-call counter at basecamp. No hosted LLM provider is added by these integrations.
