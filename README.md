@@ -129,3 +129,28 @@ Voice transcription is wired at the API level; the field UI stores voice notes a
 ```
 
 The test suite covers durable storage, daily trips, lifelist counts, API media contracts, missing optional keys, trail-mode blocking, idempotent ingest/enrichment, semantic fallback and failed-sync recovery. Mocked inference tests verify wiring, not model accuracy. See `VALIDATION.md` for real model checks and outstanding physical/cloud acceptance tests.
+
+## Mobile/offline regression checks
+
+Run the backend suite and the photo-flow regressions:
+
+```sh
+.venv/bin/python -m pytest -q
+(cd frontend && npm test)
+```
+
+Seven frontend tests cover phone-native capture, upload/cancellation, insecure-HTTP fallback, denied webcam permission and camera-track cleanup (including closing during permission setup).
+
+For real local-model tests, download your sample plant image and 3–5 second bird clip **before** disconnecting. The provided check expects `data/fixtures/plant.jpg` and `data/fixtures/soundscape.wav` (source fixtures are documented in VALIDATION.md). It never downloads assets automatically. Start the isolated test server in one terminal:
+
+```sh
+.venv/bin/python scripts/offline_server.py
+```
+
+This server runs on port 8004 with temporary SQLite/media storage, no optional keys, and all external DNS/TCP connections blocked. Loopback is allowed for the already-running, cloud-disabled Ollama daemon. It does not disconnect other apps or change production records. In another terminal:
+
+```sh
+.venv/bin/python scripts/check_offline.py
+```
+
+The check performs real photo/audio identification, saves/re-reads records, serves media, runs Q&A, checks online-action gates and verifies zero cloud calls. Open `http://localhost:8004` to exercise the same flow in a phone-width browser. A width test is not a physical iOS/Android camera or hotspot test. The full manual phone/LAN procedure above remains necessary for that acceptance criterion.

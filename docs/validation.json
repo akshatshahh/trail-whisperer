@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "automated_tests": 8,
+  "automated_tests": 15,
   "audio": [
     {
       "common": "Black-capped Chickadee",
@@ -73,5 +73,21 @@
     "queryable": true,
     "search_http_status": 200,
     "engine": "atlas"
+  },
+  "mobile_offline_regression": {
+    "frontend_tests": 7,
+    "backend_tests": 8,
+    "viewport_width": 390,
+    "content_width": 390,
+    "real_photo": "Rose",
+    "real_audio": "Black-capped Chickadee",
+    "audio_confidence": 0.8141,
+    "outbound_server_network": "loopback only",
+    "cloud_calls": 0,
+    "real_qa": true,
+    "page_reload_persistence": true,
+    "backend_restart_persistence": true,
+    "physical_phone_test": false,
+    "browser_internet_disabled": false
   }
 }

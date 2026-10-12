@@ -34,3 +34,14 @@ Online Leaflet maps are replaced with coordinate links; image-query semantic sea
 BirdNET's soundscape: https://github.com/birdnet-team/BirdNET-Analyzer/blob/main/birdnet_analyzer/example/soundscape.wav
 
 Flower photo: TensorFlow flower_photos archive, roses/14810868100_87eb739f26_m.jpg, https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz (dataset license/attribution remain with the upstream archive).
+
+## Additional mobile/offline regression run
+
+- **15 automated tests pass:** eight backend tests plus seven new photo-flow tests. Frontend production build passes.
+- A 390 × 844 browser completed real plant-image upload → local Gemma identification (Rose) → save → page reload. Document/content widths both measured 390 px; no horizontal overflow.
+- An isolated server denied non-loopback DNS and TCP connections. Its deliberate external probe was blocked. Identification, Q&A and saving triggered no additional denied attempts and health remained at zero cloud calls. Ollama was independently running with `OLLAMA_NO_CLOUD=true`; BirdNET's worker disallows runtime network downloads.
+- Real BirdNET identified Black-capped Chickadee at 0.8141 confidence through that server. Real Gemma Q&A used the saved sightings.
+- Two saved fixture sightings and their media persisted across a real test-server restart. Production journal and Atlas were untouched.
+- All observed image/script/style/manifest URLs in the tested phone page were local paths. Browser-wide internet was not disabled; the backend network policy and page asset inspection are the limits of this simulation.
+- Screenshot: `docs/offline-mobile.jpg`. Repeatable commands: `scripts/offline_server.py` and `scripts/check_offline.py`. Detailed local proof is retained in ignored `data/offline-regression-proof.json`.
+- A physical phone hotspot/airplane-mode test and actual native camera capture are still unverified.
