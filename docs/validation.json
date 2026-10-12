@@ -109,7 +109,11 @@
     "sentry": {
       "implemented": true,
       "sdk_envelope_tested": true,
-      "live_verified": false
+      "live_verified": false,
+      "ingestion_http_status": 200,
+      "real_local_gemma_trace": true,
+      "render_enabled": false,
+      "dashboard_receipt_confirmed": false
     },
     "serpapi": {
       "implemented": true,
