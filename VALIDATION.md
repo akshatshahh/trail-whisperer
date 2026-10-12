@@ -53,3 +53,5 @@ Eight additional regressions pass, bringing the total to 23 (16 backend/integrat
 Both new providers still require credentials and real external verification. They are implemented, not yet counted as demonstrated sponsor entries. `scripts/check_sponsors.py` performs a synthetic-data live test when keys are supplied; confirm Sentry dashboard receipt separately.
 
 Sentry follow-up: a synthetic real local-Gemma trace was sent to the configured project and ingestion returned HTTP 200. Render still reports Sentry disabled; deployed environment setup and dashboard receipt remain to be confirmed. No prompts, credentials or private journal records were included in the trace.
+
+SerpApi follow-up: a real public-species search returned three reference links and local Gemma generated sourced field notes. The combined sponsor check flushed research/model traces to Sentry using temporary SQLite data; no personal journal records were accessed or changed. Render still reports both sponsors disabled until its environment settings are updated.

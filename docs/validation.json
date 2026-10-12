@@ -118,7 +118,10 @@
     "serpapi": {
       "implemented": true,
       "regression_tested": true,
-      "live_verified": false
+      "live_verified": true,
+      "reference_links": 3,
+      "local_gemma_notes_verified": true,
+      "render_enabled": false
     }
   }
 }
